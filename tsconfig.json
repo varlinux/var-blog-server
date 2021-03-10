@@ -4,6 +4,7 @@
     "outDir": "./dist",
     "target": "es5",
     "sourceMap": true,
+    "skipLibCheck": true,
     "allowSyntheticDefaultImports": true
   },
   "include": [

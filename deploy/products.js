@@ -1,7 +1,7 @@
 const fs = require('fs')
 const path = require('path')
 // 部署服务器配置文件
-const envFile = process.env.NODE_ENV === 'prod' ? './.env.prod' : './.env.test'
+const envFile = process.env.NODE_ENV === 'prod' ? './.env.prod' : './.env.dev'
 // env环境变量的路径
 const envPath = path.resolve(__dirname, envFile)
 // env对象
