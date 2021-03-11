@@ -3,6 +3,8 @@ import * as express from 'express'
 import * as dotenv from 'dotenv'
 dotenv.config()
 
+console.log(`process.env.SECRET_KEY : `, process.env.SECRET_KEY)
+
 const app = express()
 
 // module.exports = app

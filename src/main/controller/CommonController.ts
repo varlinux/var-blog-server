@@ -45,14 +45,5 @@ router.post('/admin/login', (req, res) => {
         res.json(resultDto.isFailure(LoginEnum.IS_FAILURE))
     }
 })
-
-router.get('/admin', async (req, res, next) => {
-    res.sendFile(path.join(__dirname, '../../../admin/index.html'))
-})
-
-router.get('/index', async (req, res, next) => {
-    res.sendFile(path.join(__dirname, '../../../index/index.html'))
-})
-
 // module.exports = router;
 export default router
