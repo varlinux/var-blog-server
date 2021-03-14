@@ -19,7 +19,7 @@ export default class BlogArticleService implements BaseService {
         try {
             await this.getObjByKey('atc_id', val).then(res => isExit = StringUtils.isNotEmptyArr(res))
             if (isExit) {
-                let sql = `delete from blog_article where ${key}=?`
+                let sql = `delete from blog_article as ba where ${key}=?`
                 return await this.dbConnection.queryByPool(sql, val)
             }
             return Promise.reject(ArticleEnum.IS_NOT_EXIST)
@@ -30,7 +30,7 @@ export default class BlogArticleService implements BaseService {
 
     async getAll(): Promise<any> {
         try {
-            let sql = `select ${this.defaultSelectPrototype} from blog_article`
+            let sql = `select ${this.defaultSelectPrototype} from blog_article as ba`
             return await this.dbConnection.queryByPool(sql)
         } catch (e) {
             return Promise.reject(ArticleEnum.OPERATE_SELECT_FAILURE)
@@ -39,7 +39,7 @@ export default class BlogArticleService implements BaseService {
 
     async getObjByKey(key: string, val: string): Promise<any> {
         try {
-            let sql = `select ${this.defaultSelectPrototype} from blog_article where ${key}=?`
+            let sql = `select ${this.defaultSelectPrototype} from blog_article as ba where ${key}=?`
             return await this.dbConnection.queryByPool(sql, val)
         } catch (e) {
             return Promise.reject(ArticleEnum.OPERATE_SELECT_FAILURE)
@@ -69,7 +69,7 @@ export default class BlogArticleService implements BaseService {
         try {
             let sql = `
                 SELECT ${this.defaultSelectPrototype}
-                FROM blog_article
+                FROM blog_article as ba
                 ORDER BY DATE_FORMAT(ba.atc_create_time, '${this.defaultDateFormat}') DESC
                 LIMIT ?,?`
             return this.dbConnection.queryByPool(StringUtils.formatSql(sql), [pageIndex, size])
