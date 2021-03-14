@@ -87,6 +87,19 @@ router.get('/getByLimit', async function (req, res) {
     }
 })
 
+router.get('/getOrderByLimit', async function (req, res) {
+    try {
+        const {order, pageIndex, size} = req.query
+        articleService.getOrderByLimit(String(order).toUpperCase(), Number(size), Number(pageIndex) * Number(size)).then(data => {
+            res.json(resultDto.isOk(data))
+        }).catch(err => {
+            res.json(resultDto.isFailure(ArticleEnum.OPERATE_SELECT_FAILURE))
+        })
+    } catch (e) {
+        res.json(resultDto.isFailure(ArticleEnum.OPERATE_SELECT_FAILURE))
+    }
+})
+
 router.delete('/delete/:id', function (req, res) {
     try {
         let userId = req.params.id

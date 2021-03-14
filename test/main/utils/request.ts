@@ -1,11 +1,14 @@
 import fs = require("fs");
 import path = require("path");
-// import axios =require("axios");
 import axios from 'axios'
 
 // create an axios instance
 let service = axios.create({
-  timeout: 10000 // request timeout
+  timeout: 10000, // request timeout
+  proxy: {
+    host: '127.0.0.1',
+    port: 3000
+  }
 })
 const filePath = path.resolve(__dirname, '../common/token')
 // request interceptor

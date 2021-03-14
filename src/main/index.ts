@@ -5,12 +5,6 @@ import * as bodyParser from 'body-parser'
 import {getLogger, useLogger} from './config/Log4J'
 const logger = getLogger('default')
 useLogger(app, logger)
-app.use(function (res, req, next) {
-    logger.info('req.req.body的值是:', req.req.body,
-        '，req.req.query的值是:', req.req.query,
-        '，req.req.params的值是:', req.req.params);
-    next()
-})
 
 // import * as session from "express-session";
 import JwtFilter from './filter/JwtFilter'

@@ -10,6 +10,10 @@ export default class BlogArticleService implements BaseService {
 
     private dbConnection = new DBConnection();
 
+    private defaultSelectPrototype = 'ba.atc_id, ba.atc_title, ba.atc_content, ba.atc_create_time, ba.atc_edit_time, ba.atc_author'
+
+    private defaultDateFormat = '%Y-%m-%d %H:%i:%S'
+
     async delete(key: string, val: string): Promise<any> {
         let isExit
         try {
@@ -26,7 +30,7 @@ export default class BlogArticleService implements BaseService {
 
     async getAll(): Promise<any> {
         try {
-            let sql = `select * from blog_article`
+            let sql = `select ${this.defaultSelectPrototype} from blog_article`
             return await this.dbConnection.queryByPool(sql)
         } catch (e) {
             return Promise.reject(ArticleEnum.OPERATE_SELECT_FAILURE)
@@ -35,7 +39,7 @@ export default class BlogArticleService implements BaseService {
 
     async getObjByKey(key: string, val: string): Promise<any> {
         try {
-            let sql = `select * from blog_article where ${key}=?`
+            let sql = `select ${this.defaultSelectPrototype} from blog_article where ${key}=?`
             return await this.dbConnection.queryByPool(sql, val)
         } catch (e) {
             return Promise.reject(ArticleEnum.OPERATE_SELECT_FAILURE)
@@ -48,7 +52,7 @@ export default class BlogArticleService implements BaseService {
      */
     async getAllByTagId(tagId: string): Promise<any> {
         try {
-            let sql = `SELECT * 
+            let sql = `SELECT ${this.defaultSelectPrototype}
                 from blog_article as ba 
                 where ba.atc_id=(
                     select DISTINCT rat.at_atc_id 
@@ -64,13 +68,28 @@ export default class BlogArticleService implements BaseService {
     async getByLimit(pageIndex: number, size: number): Promise<any> {
         try {
             let sql = `
-                SELECT *
+                SELECT ${this.defaultSelectPrototype}
                 FROM blog_article
+                ORDER BY DATE_FORMAT(ba.atc_create_time, '${this.defaultDateFormat}') DESC
                 LIMIT ?,?`
             return this.dbConnection.queryByPool(StringUtils.formatSql(sql), [pageIndex, size])
         } catch (e) {
             return Promise.reject(ArticleEnum.OPERATE_SELECT_FAILURE)
         }
+    }
+
+    async getOrderByLimit(order: string, size: number, index: number): Promise<unknown> {
+        try {
+            let sql = `SELECT ${this.defaultSelectPrototype}
+            FROM blog_article as ba
+            WHERE ba.atc_status = 1
+            ORDER BY DATE_FORMAT(ba.atc_create_time, '${this.defaultDateFormat}') ${order === 'DESC' ? 'DESC' : 'ASC'}
+            LIMIT ?,?`
+            return this.dbConnection.queryByPool(StringUtils.formatSql(sql), [index, size])
+        } catch (e) {
+            return Promise.reject(ArticleEnum.OPERATE_SELECT_FAILURE)
+        }
+
     }
 
     async insert(obj: BlogArticle): Promise<any> {
