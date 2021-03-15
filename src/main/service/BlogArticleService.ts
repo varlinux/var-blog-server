@@ -19,7 +19,7 @@ export default class BlogArticleService implements BaseService {
         try {
             await this.getObjByKey('atc_id', val).then(res => isExit = StringUtils.isNotEmptyArr(res))
             if (isExit) {
-                let sql = `delete from blog_article as ba where ${key}=?`
+                let sql = `delete from blog_article where ${key}=?`
                 return await this.dbConnection.queryByPool(sql, val)
             }
             return Promise.reject(ArticleEnum.IS_NOT_EXIST)
