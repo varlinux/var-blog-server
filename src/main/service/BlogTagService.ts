@@ -1,5 +1,5 @@
 import DBConnection from '../db/mysqlConn'
-import BlogTag from "../dao/BlogTag";
+import BlogTag, {TagStatusEnum} from "../dao/BlogTag";
 import StringUtils from "../utils/StringUtils";
 import DateUtils from "../utils/DateUtils";
 import {BaseService} from "./BaseService";
@@ -45,18 +45,29 @@ export default class BlogTagService implements BaseService {
      * @param tag
      */
     public async insert(tag: BlogTag) {
-        let isExist;
+        // let isExist;
         try {
-            await this.getObjByKey('tag_name', tag.tag_name).then(res => isExist = StringUtils.isNotEmptyArr(res));
-            if (!isExist) {
-                tag.tag_id = await UuidUtils.generateUUID1()
-                tag.tag_create_time = await DateUtils.now()
-                tag.tag_status = 1
-                let sql = `insert into blog_tag (${tag.keys()}) values(${tag.values()})`
+            // await this.getObjByKey('tag_name', tag.tag_name).then(res => isExist = StringUtils.isNotEmptyArr(res));
+            // if (!isExist) {
+                // tag.tag_id = await UuidUtils.generateUUID1()
+                // tag.tag_create_time = await DateUtils.now()
+                // tag.tag_status = 1
+                const params = [
+                    await UuidUtils.generateUUID1(),
+                    tag.tag_name,
+                    await DateUtils.now(),
+                    TagStatusEnum.IS_DEATH,
+                    tag.tag_name
+                ]
+                // let sql = `insert into blog_tag (${tag.keys()}) values(${tag.values()})`
+                const sql = `INSERT into blog_tag(tag_id, tag_name, tag_create_time, tag_status)
+                SELECT ?, ?, ?, ?
+                FROM DUAL
+                WHERE NOT EXISTS(SELECT tag_name FROM blog_tag WHERE tag_name = ?)`
                 // return result
-                return this.dbConnection.queryByPool(sql)
-            }
-            return Promise.reject(TagEnum.IS_EXIST);
+                return this.dbConnection.queryByPool(sql, params)
+            // }
+            // return Promise.reject(TagEnum.IS_EXIST);
         } catch (e) {
             return Promise.reject(TagEnum.OPERATE_INSERT_FAILURE);
         }
@@ -64,14 +75,25 @@ export default class BlogTagService implements BaseService {
 
     /**
      * 插入所有标签
-     * todo 检查标签是否存在是以标签名称为判断依据
      * @param tags
      */
     public async insertAll(tags: Array<BlogTag>) {
         try {
-            const fn = (tag) => {
-                let sql = `insert into blog_tag (${tag.keys()}) values(${tag.values()})`
-                return this.dbConnection.queryByPool(sql)
+            let params = []
+            const fn = async tag => {
+                params = [
+                    await UuidUtils.generateUUID1(),
+                    tag.tag_name,
+                    await DateUtils.now(),
+                    TagStatusEnum.IS_DEATH,
+                    tag.tag_name
+                ]
+                // let sql = `insert into blog_tag (${tag.keys()}) values(${tag.values()})`
+                const sql = `INSERT into blog_tag(tag_id, tag_name, tag_create_time, tag_status)
+                SELECT ?, ?, ?, ?
+                FROM DUAL
+                WHERE NOT EXISTS(SELECT tag_name FROM blog_tag WHERE tag_name = ?)`
+                return this.dbConnection.queryByPool(sql, params)
             }
             let arr = []
             tags.forEach(item => {
