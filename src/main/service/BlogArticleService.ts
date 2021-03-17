@@ -5,6 +5,7 @@ import BlogArticle from "../dao/BlogArticle";
 import uuid from '../utils/UuidUtils'
 import date from '../utils/DateUtils'
 import {TagEnum, ArticleEnum} from "../enum/MessageEnum";
+import {forwardTrans, reverseTrans} from '../utils/CharacterUtils'
 
 export default class BlogArticleService implements BaseService {
 
@@ -31,7 +32,7 @@ export default class BlogArticleService implements BaseService {
     async getAll(): Promise<any> {
         try {
             let sql = `select ${this.defaultSelectPrototype} from blog_article as ba`
-            return await this.dbConnection.queryByPool(sql)
+            return this.dbConnection.queryByPool(sql)
         } catch (e) {
             return Promise.reject(ArticleEnum.OPERATE_SELECT_FAILURE)
         }
@@ -98,6 +99,9 @@ export default class BlogArticleService implements BaseService {
             obj.atc_id = await uuid.generateUUID1()
             obj.atc_create_time = await date.now()
             obj.atc_status = 1
+            console.log(`obj.atc_content : `, obj.atc_content)
+            obj.atc_content = await forwardTrans(obj.atc_content)
+            obj.atc_title = await forwardTrans(obj.atc_title)
             await this.getObjByKey('atc_id',obj.atc_id).then(res => isExit = StringUtils.isNotEmptyArr(res));
             if (!isExit) {
                 let sql = `insert into blog_article (${obj.keys()}) values(${obj.values()})`;
@@ -113,15 +117,16 @@ export default class BlogArticleService implements BaseService {
         let isExit;
         try {
             obj.atc_edit_time = await date.now()
-            console.log(`obj.atc_edit_time : ${obj.atc_edit_time}`)
+            console.log(`obj.atc_content : `, obj.atc_content)
+            obj.atc_content = await forwardTrans(obj.atc_content)
+            obj.atc_title = await forwardTrans(obj.atc_title)
             await this.getObjByKey('atc_id', obj.atc_id).then(res => isExit = StringUtils.isNotEmptyArr(res));
             if (isExit) {
                 let sql = `update blog_article 
-                    set atc_title = '${obj.atc_title}', atc_content = '${obj.atc_content}',
-                        atc_edit_time = '${obj.atc_edit_time}', tag_ids = '${obj.tag_ids}',
-                        atc_author = '${obj.atc_author}'
-                    where atc_id = '${obj.atc_id}'`
-                return await this.dbConnection.queryByPool(await StringUtils.formatSql(sql))
+                    set atc_title = ?, atc_content = ?, atc_edit_time = ?, tag_ids = ?, atc_author = ?
+                    where atc_id = ?`
+                return this.dbConnection.queryByPool(StringUtils.formatSql(sql), 
+                    [obj.atc_title, obj.atc_content, obj.atc_edit_time, obj.tag_ids, obj.atc_author, obj.atc_id])
             }
             return Promise.reject(ArticleEnum.IS_NOT_EXIST)
         } catch (e) {
