@@ -79,10 +79,11 @@ export default class BlogTagService implements BaseService {
      */
     public async insertAll(tags: Array<BlogTag>) {
         try {
-            let params = []
+            let params = [], tag_id = null
             const fn = async tag => {
+                tag_id = await UuidUtils.generateUUID1()
                 params = [
-                    await UuidUtils.generateUUID1(),
+                    tag_id,
                     tag.tag_name,
                     await DateUtils.now(),
                     TagStatusEnum.IS_DEATH,
@@ -93,7 +94,9 @@ export default class BlogTagService implements BaseService {
                 SELECT ?, ?, ?, ?
                 FROM DUAL
                 WHERE NOT EXISTS(SELECT tag_name FROM blog_tag WHERE tag_name = ?)`
-                return this.dbConnection.queryByPool(sql, params)
+                const {affectedRows} = await this.dbConnection.queryByPool(sql, params)
+                console.log(`result : `, result)
+                return affectedRows ? tag_id : ''
             }
             let arr = []
             tags.forEach(item => {

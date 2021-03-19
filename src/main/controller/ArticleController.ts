@@ -115,22 +115,23 @@ router.delete('/delete/:id', function (req, res) {
 
 router.post('/insert', async function (req, res) {
     try {
-        const data = req.body
+        const data = req.body,
+            {dynamicTags} = data
         // 1、获取所有标签并为没有标签编号的标签赋值（创建时间、标签编号、标签状态）,过程中将标签编号传入数组中
-        let newTags = data.dynamicTags.filter(item => !item.tag_id && item.tag_name)
-        let tagArr = await getNewTag(newTags)
+        // let newTags = data.dynamicTags.filter(item => !item.tag_id && item.tag_name)
+        // let tagArr = await getNewTag(newTags)
         // todo 事务控制可以通过执行多个sql语句进行控制
-        await tagService.insertAll(tagArr)
-        const article = await new Article().seal(data)
-        tagArr = await data.dynamicTags
-            .filter(item => item.tag_id)    // 过滤旧标签
-            .concat(tagArr) // 追加新标签
-            .map(item => item.tag_id)
-        article.tag_ids = tagArr.toString()    // 取出tag_id，并转化为数组字符串（以逗号隔离）
-        article.blog_user_id = data.blog_user_id
-        const result = await articleService.insert(article)
-        await relArticleTagService.insertAll(tagArr, article.atc_id)
-        return res.json(resultDto.isOk(result))
+        const tags = await tagService.insertAll(dynamicTags)
+        // const article = await new Article().seal(data)
+        // // tagArr = await data.dynamicTags
+        // //     .filter(item => item.tag_id)    // 过滤旧标签
+        // //     .concat(tagArr) // 追加新标签
+        // //     .map(item => item.tag_id)
+        // article.tag_ids = tagArr.toString()    // 取出tag_id，并转化为数组字符串（以逗号隔离）
+        // article.blog_user_id = data.blog_user_id
+        // const result = await articleService.insert(article)
+        // await relArticleTagService.insertAll(tagArr, article.atc_id)
+        return res.json(resultDto.isOk('success'))
     } catch (e) {
         res.json(resultDto.isFailure(ArticleEnum.OPERATE_INSERT_FAILURE))
     }
