@@ -87,16 +87,23 @@ export default class BlogTagService implements BaseService {
                     tag.tag_name,
                     await DateUtils.now(),
                     TagStatusEnum.IS_DEATH,
+                    tag.tag_name,
                     tag.tag_name
                 ]
                 // let sql = `insert into blog_tag (${tag.keys()}) values(${tag.values()})`
                 const sql = `INSERT into blog_tag(tag_id, tag_name, tag_create_time, tag_status)
                 SELECT ?, ?, ?, ?
                 FROM DUAL
-                WHERE NOT EXISTS(SELECT tag_name FROM blog_tag WHERE tag_name = ?)`
-                const {affectedRows} = await this.dbConnection.queryByPool(sql, params)
-                console.log(`result : `, result)
-                return affectedRows ? tag_id : ''
+                WHERE NOT EXISTS(SELECT tag_name FROM blog_tag WHERE tag_name = ?); 
+                SELECT bt.tag_id 
+                from blog_tag as bt 
+                WHERE bt.tag_name = ?;`
+                const result = await this.dbConnection.queryByPool(sql, params)
+                return result.map(item => {
+                    if(Array.isArray(item)) {
+                        return item?.[0]?.tag_id
+                    }
+                })
             }
             let arr = []
             tags.forEach(item => {

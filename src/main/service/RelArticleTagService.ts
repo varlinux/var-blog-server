@@ -72,6 +72,15 @@ export default class RelArticleTagService {
                 rel.at_atc_id = atcId
                 rel.at_tag_id = tagId
                 let sql = `insert into rel_article_tag (${rel.keys()}) values(${rel.values()})`
+                // let sql = `INSERT into rel_article_tag(at_id, at_atc_id, at_tag_id, at_create_time)
+                // SELECT ?, ?, ?, ?
+                // FROM DUAL
+                // WHERE NOT EXISTS(
+                // SELECT at_atc_id , at_tag_id
+                // FROM rel_article_tag 
+                // WHERE at_atc_id = ? AND at_tag_id = ?)`
+                // return this.dbConnection.queryByPool(sql, [rel.at_id, rel.at_atc_id, 
+                //     rel.at_tag_id, rel.at_create_time, rel.at_atc_id, rel.at_tag_id])
                 return this.dbConnection.queryByPool(sql)
             }
             let arr = []

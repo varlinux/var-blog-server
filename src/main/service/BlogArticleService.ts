@@ -11,7 +11,7 @@ export default class BlogArticleService implements BaseService {
 
     private dbConnection = new DBConnection();
 
-    private defaultSelectPrototype = 'ba.atc_id, ba.atc_title, ba.atc_content, ba.atc_create_time, ba.atc_edit_time, ba.atc_author'
+    private defaultSelectPrototype = 'ba.atc_id, ba.atc_title, ba.atc_content, ba.atc_create_time, ba.atc_edit_time, ba.atc_author, ba.tag_ids'
 
     private defaultDateFormat = '%Y-%m-%d %H:%i:%S'
 
